@@ -11,7 +11,7 @@ class ScheduleEntrySerializer(serializers.ModelSerializer):
         source="get_day_of_week_display", read_only=True
     )
     week_display = serializers.CharField(
-        source="get_week_of_month_display", read_only=True
+        source="get_week_of_month_display", read_only=True, allow_null=True
     )
 
     class Meta:

@@ -1,0 +1,286 @@
+openapi: 3.0.3
+info:
+  title: St Joseph Catholic Church API
+  version: 1.0.0
+  description: Backend API for the St Joseph Catholic Church website.
+paths:
+  /api/v1/about/people/:
+    get:
+      operationId: about_people_list
+      description: Public list of active people for the About page. Supports ?group=pastoral
+        or ?group=official.
+      parameters:
+      - in: query
+        name: group
+        schema:
+          type: string
+          enum:
+          - official
+          - pastoral
+        description: |-
+          * `pastoral` - Pastoral
+          * `official` - Church official
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - about
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPersonList'
+          description: ''
+  /api/v1/health/:
+    get:
+      operationId: health_retrieve
+      tags:
+      - health
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+  /api/v1/schedule/:
+    get:
+      operationId: schedule_list
+      tags:
+      - schedule
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScheduleEntry'
+          description: ''
+components:
+  schemas:
+    BlankEnum:
+      enum:
+      - ''
+    DayOfWeekEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - Monday
+        * `1` - Tuesday
+        * `2` - Wednesday
+        * `3` - Thursday
+        * `4` - Friday
+        * `5` - Saturday
+        * `6` - Sunday
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+      - status
+    NullEnum:
+      enum:
+      - null
+    PaginatedPersonList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+    Person:
+      type: object
+      description: Turns a Person into JSON for the About page.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        category:
+          $ref: '#/components/schemas/PersonCategoryEnum'
+        role_type:
+          oneOf:
+          - $ref: '#/components/schemas/RoleTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        role:
+          type: string
+          maxLength: 100
+        badge:
+          type: string
+          maxLength: 40
+        society_code:
+          type: string
+          maxLength: 10
+        bio:
+          type: string
+        phone:
+          type: string
+          maxLength: 30
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        display_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - category
+      - id
+      - name
+      - role
+    PersonCategoryEnum:
+      enum:
+      - clergy
+      - official
+      - society_leader
+      type: string
+      description: |-
+        * `clergy` - Clergy
+        * `official` - Official
+        * `society_leader` - Society leader
+    RoleTypeEnum:
+      enum:
+      - parish_priest
+      - assistant_priest
+      - catechist
+      type: string
+      description: |-
+        * `parish_priest` - Parish priest
+        * `assistant_priest` - Assistant priest
+        * `catechist` - Catechist
+    ScheduleEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        category:
+          $ref: '#/components/schemas/ScheduleEntryCategoryEnum'
+        category_display:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        day_display:
+          type: string
+          readOnly: true
+        week_of_month:
+          nullable: true
+          minimum: -2147483648
+          maximum: 2147483647
+          oneOf:
+          - $ref: '#/components/schemas/WeekOfMonthEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        week_display:
+          type: string
+          readOnly: true
+          nullable: true
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+          nullable: true
+        note:
+          type: string
+          maxLength: 200
+      required:
+      - category
+      - category_display
+      - day_display
+      - day_of_week
+      - id
+      - start_time
+      - title
+      - week_display
+    ScheduleEntryCategoryEnum:
+      enum:
+      - mass
+      - adoration
+      - confession
+      - sick_communion
+      - baptism
+      - class
+      - office
+      type: string
+      description: |-
+        * `mass` - Mass
+        * `adoration` - Chapel of Adoration
+        * `confession` - Confession
+        * `sick_communion` - Communion of the sick/aged
+        * `baptism` - Baptism
+        * `class` - Classes (catechism, RCIA, Bible study, marriage)
+        * `office` - Office and library
+    WeekOfMonthEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      - -1
+      type: integer
+      description: |-
+        * `1` - 1st
+        * `2` - 2nd
+        * `3` - 3rd
+        * `4` - 4th
+        * `-1` - Last
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
