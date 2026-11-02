@@ -42,6 +42,8 @@ class Person(models.Model):
     def clean(self):
         from django.core.exceptions import ValidationError
 
+        errors = {}
+
         if self.role_type and self.category != self.Category.CLERGY:
             errors["role_type"] = "Role type is only allowed for clergy."
         if self.society_code and self.category != self.Category.SOCIETY_LEADER:
