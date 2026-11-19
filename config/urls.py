@@ -8,6 +8,7 @@ urlpatterns = [
      path("api/v1/schedule/", include("schedule.urls")),
      path("api/v1/about/", include("about.urls")),
      path("api/v1/gallery/", include("gallery.urls")),
+     path("api/v1/events/", include("events.urls")),
     path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/v1/docs/",
