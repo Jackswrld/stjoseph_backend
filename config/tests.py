@@ -9,3 +9,9 @@ class HealthTests(TestCase):
             response = self.client.get(reverse("health"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
+
+    def test_api_root_is_ok_and_does_not_touch_the_database(self):
+        with self.assertNumQueries(0):
+            response = self.client.get(reverse("root"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
