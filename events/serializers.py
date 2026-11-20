@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from .models import (
     Event,
@@ -50,6 +51,14 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         fields = ["role", "name"]
 
 
+class TeamSerializer(serializers.Serializer):
+    """Describes the shape of "team" for the API docs only."""
+
+    name = serializers.CharField()
+    image = serializers.URLField(allow_null=True)
+    members = TeamMemberSerializer(many=True)
+
+
 class GuestSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventGuest
@@ -91,6 +100,7 @@ class EventDetailSerializer(serializers.ModelSerializer):
             "important_info",
         ]
 
+    @extend_schema_field(TeamSerializer)
     def get_team(self, obj):
         return {
             "name": obj.team_name,
